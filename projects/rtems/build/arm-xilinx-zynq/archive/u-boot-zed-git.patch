@@ -1,0 +1,27 @@
+diff --git a/api/api_net.c b/api/api_net.c
+index 04e4f4a..67c2916 100644
+--- a/api/api_net.c
++++ b/api/api_net.c
+@@ -25,7 +25,7 @@ DECLARE_GLOBAL_DATA_PTR;
+ 
+ #define errf(fmt, args...) do { printf("ERROR @ %s(): ", __func__); printf(fmt, ##args); } while (0)
+ 
+-#ifdef CONFIG_CMD_NET
++#if defined(CONFIG_CMD_NET) && !defined(CONFIG_DM_ETH)
+ 
+ static int dev_valid_net(void *cookie)
+ {
+diff --git a/include/configs/zynq_microzed.h b/include/configs/zynq_microzed.h
+index ec7bb1c..c09ab9f 100644
+--- a/include/configs/zynq_microzed.h
++++ b/include/configs/zynq_microzed.h
+@@ -12,6 +12,9 @@
+ 
+ #define CONFIG_SYS_NO_FLASH
+ 
++#define CONFIG_ZYNQ_BOOT_FREEBSD
++#define CONFIG_API
++
+ #define CONFIG_ZYNQ_USB
+ 
+ #include <configs/zynq-common.h>

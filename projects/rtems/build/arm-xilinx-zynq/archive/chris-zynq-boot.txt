@@ -1,0 +1,72 @@
+On 29/08/2016 05:00, Spencer Deevy wrote:
+> Hello everyone, this is my first post here, so here goes.
+
+Welcome to RTEMS and sorry about the time taken to reply.
+
+>
+> I've been trying to figure out how to configure RTEMS for the Zedboard
+> development board for quite some time now, but with little luck..
+>
+
+I am testing and developing RTEMS on a MicroZed board so I hope I can help.
+
+> I have looked through the board support packages, and I've tried
+> building RTEMS for that board support package with the required cross
+> compiler, but nothing seems to work.
+
+A full build of all parts from source requires a few parts to come 
+together. I use a FreeBSD package for the compiler to build u-boot. 
+Everything else is from source.
+
+> The two methods by which I can load an image onto the Zedboard are via
+> the SD card, or by burning to the chip itself. I have more experience
+> with burning images to the SD card, but either method would be fine.
+
+I am using a 3rd option, u-boot on an SD card and booting over the 
+network to download RTEMS to run.
+
+> If anyone has a step-by-step guide for building RTEMS with a BSP, or
+> even the Zedboard itself, that would be great. If anyone has any advice
+> on where to start on this, it would be much appreciated. Let me know
+> your thoughts.
+
+1. Host machine is FreeBSD 10.3-RELEASE-p3.
+  1.1 U-Boot needs an ARM compiler, using packages:
+    arm-none-eabi-binutils-2.25.1_1
+    arm-none-eabi-gcc-5.3.0
+
+2. U-Boot
+  2.1 From git:
+     $ git clone git://git.denx.de/u-boot.git
+  2.2 Local patch (attached).
+  2.3 Build with:
+     $ gmake CROSS_COMPILE=arm-none-eabi- CONFIG_API=y
+  2.4 Copy spl/boot.bin to the SD card.
+  2.5 Copy u-boot.img to the SD card.
+  2.6 Create a suitable uEnv.txt to boot u-boot for your system.
+       (My SD crad reader is at home at the moment)
+
+3. RTEMS
+  2.1 Build tools using the RSB for 4.12/rtems-arm.
+  2.2 Get RTEMS from git:
+     $ git clone git://git.rtems.org/rtems.git
+    Note: this patch is need:
+     https://lists.rtems.org/pipermail/devel/2016-August/015982.html
+  2.3 Bootstrap
+  2.4 Configure:
+     $ ../rtems/configure --target=arm-rtems4.12 \
+         --prefix=/opt/work/chris/rtems/kernel/4.12 \
+         --disable-networking \
+         --enable-rtemsbsp=xilinx_zynq_zedboard \
+         --enable-smp \
+         --enable-test
+  2.5 Build:
+     $ make -j 8
+  2.6 Convert the RTEMS executable so u-boot can load it. I attach a
+      script based on Pavel's posts. Please edit to your tools path:
+     $ rtems-zynq-mkimg \
+ 
+./arm-rtems4.12/c/xilinx_zynq_zedboard/testsuites/samples/ticker/ticker.exe
+  2.7 Copy ticker.exe.img to the SD card or network download location.
+
+Chris

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+APPEXE=arm-rtems4.12/c/xilinx_zynq_zedboard/testsuites/samples/ticker/ticker.exe
+
+rm -f "${APPEXE}"
+
+make || exit 1
+
+/srv/tftp/zynq/rtems/rtems-zynq-mkimg "${APPEXE}" || exit 1
+cp -v "${APPEXE}" /srv/tftp/zynq/rtems/app.exe || exit 1
+cp -v "${APPEXE}.img" /srv/tftp/zynq/rtems/app.img || exit 1
+cp -v "${APPEXE}.bin" /srv/tftp/zynq/rtems/app.bin || exit 1
+
+#load mmc 0 0x00008000 ticker.bin.
+#go 0x00008000
+
+#dhcp
+#tftp 0x20000000  192.168.1.37:rpi/rtems/app.img

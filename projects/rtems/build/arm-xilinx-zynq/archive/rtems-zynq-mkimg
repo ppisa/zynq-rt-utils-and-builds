@@ -1,0 +1,15 @@
+#! /bin/sh
+
+OBJCOPY_FOR_TARGET=arm-rtems4.12-objcopy
+OBJCOPY="$OBJCOPY_FOR_TARGET"
+
+EXE_NAME=$1
+
+START_ADDR=0x00104000
+ENTRY_ADDR=0x00104000
+
+${OBJCOPY} -R -S --strip-debug -O binary "$EXE_NAME" "$EXE_NAME.bin" || exit 1
+cat "$EXE_NAME.bin" | gzip -9 >"$EXE_NAME.gz"
+mkimage \
+  -A arm -O rtems -T kernel -a $START_ADDR -e $ENTRY_ADDR -n "RTEMS" \
+  -d "$EXE_NAME.gz" "$EXE_NAME.img"
