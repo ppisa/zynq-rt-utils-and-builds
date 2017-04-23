@@ -1,0 +1,417 @@
+From f9643f7e5a1d2651c5325280ab4324fd794aac77 Mon Sep 17 00:00:00 2001
+From: Pavel Pisa <ppisa@pikron.com>
+Date: Sun, 12 Feb 2017 19:22:48 +0100
+Subject: [PATCH 1/3] ARM: zynq: MicroZed, configure clocks and pins for UAR0
+ on MIO pins 10 and 11.
+
+Signed-off-by: Pavel Pisa <ppisa@pikron.com>
+---
+ arch/arm/dts/zynq-microzed.dts                 |  10 +-
+ board/xilinx/zynq/zynq-microzed/ps7_init_gpl.c | 156 +++++++++++++------------
+ 2 files changed, 89 insertions(+), 77 deletions(-)
+
+diff --git a/arch/arm/dts/zynq-microzed.dts b/arch/arm/dts/zynq-microzed.dts
+index 2d07b92..785f7cd 100644
+--- a/arch/arm/dts/zynq-microzed.dts
++++ b/arch/arm/dts/zynq-microzed.dts
+@@ -13,7 +13,8 @@
+ 	compatible = "xlnx,zynq-microzed", "xlnx,zynq-7000";
+ 
+ 	aliases {
+-		serial0 = &uart1;
++		serial0 = &uart0;
++		serial1 = &uart1;
+ 		spi0 = &qspi;
+ 		mmc0 = &sdhci0;
+ 	};
+@@ -25,7 +26,7 @@
+ 
+ 	chosen {
+ 		bootargs = "earlyprintk";
+-		stdout-path = "serial0:115200n8";
++		stdout-path = "serial1:115200n8";
+ 	};
+ 
+ 	usb_phy0: phy0 {
+@@ -43,6 +44,11 @@
+ 	status = "okay";
+ };
+ 
++&uart0 {
++	u-boot,dm-pre-reloc;
++	status = "okay";
++};
++
+ &uart1 {
+ 	u-boot,dm-pre-reloc;
+ 	status = "okay";
+diff --git a/board/xilinx/zynq/zynq-microzed/ps7_init_gpl.c b/board/xilinx/zynq/zynq-microzed/ps7_init_gpl.c
+index eb29002..2271d65 100644
+--- a/board/xilinx/zynq/zynq-microzed/ps7_init_gpl.c
++++ b/board/xilinx/zynq/zynq-microzed/ps7_init_gpl.c
+@@ -311,9 +311,9 @@ unsigned long ps7_clock_init_data_3_0[] = {
+     // ..     ==> MASK : 0x00003F00U    VAL : 0x00001400U
+     // ..
+     EMIT_MASKWRITE(0XF8000150, 0x00003F33U ,0x00001401U),
+-    // .. CLKACT0 = 0x0
+-    // .. ==> 0XF8000154[0:0] = 0x00000000U
+-    // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
++    // .. CLKACT0 = 0x1
++    // .. ==> 0XF8000154[0:0] = 0x00000001U
++    // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+     // .. CLKACT1 = 0x1
+     // .. ==> 0XF8000154[1:1] = 0x00000001U
+     // ..     ==> MASK : 0x00000002U    VAL : 0x00000002U
+@@ -324,7 +324,7 @@ unsigned long ps7_clock_init_data_3_0[] = {
+     // .. ==> 0XF8000154[13:8] = 0x00000014U
+     // ..     ==> MASK : 0x00003F00U    VAL : 0x00001400U
+     // ..
+-    EMIT_MASKWRITE(0XF8000154, 0x00003F33U ,0x00001402U),
++    EMIT_MASKWRITE(0XF8000154, 0x00003F33U ,0x00001403U),
+     // .. CLKACT = 0x1
+     // .. ==> 0XF8000168[0:0] = 0x00000001U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+@@ -424,9 +424,9 @@ unsigned long ps7_clock_init_data_3_0[] = {
+     // .. I2C1_CPU_1XCLKACT = 0x1
+     // .. ==> 0XF800012C[19:19] = 0x00000001U
+     // ..     ==> MASK : 0x00080000U    VAL : 0x00080000U
+-    // .. UART0_CPU_1XCLKACT = 0x0
+-    // .. ==> 0XF800012C[20:20] = 0x00000000U
+-    // ..     ==> MASK : 0x00100000U    VAL : 0x00000000U
++    // .. UART0_CPU_1XCLKACT = 0x1
++    // .. ==> 0XF800012C[20:20] = 0x00000001U
++    // ..     ==> MASK : 0x00100000U    VAL : 0x00100000U
+     // .. UART1_CPU_1XCLKACT = 0x1
+     // .. ==> 0XF800012C[21:21] = 0x00000001U
+     // ..     ==> MASK : 0x00200000U    VAL : 0x00200000U
+@@ -440,7 +440,7 @@ unsigned long ps7_clock_init_data_3_0[] = {
+     // .. ==> 0XF800012C[24:24] = 0x00000001U
+     // ..     ==> MASK : 0x01000000U    VAL : 0x01000000U
+     // ..
+-    EMIT_MASKWRITE(0XF800012C, 0x01FFCCCDU ,0x01EC044DU),
++    EMIT_MASKWRITE(0XF800012C, 0x01FFCCCDU ,0x01FC044DU),
+     // .. FINISH: CLOCK CONTROL SLCR REGISTERS
+     // .. START: THIS SHOULD BE BLANK
+     // .. FINISH: THIS SHOULD BE BLANK
+@@ -2303,9 +2303,9 @@ unsigned long ps7_mio_init_data_3_0[] = {
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+     EMIT_MASKWRITE(0XF8000724, 0x00003FFFU ,0x00000600U),
+-    // .. TRI_ENABLE = 0
+-    // .. ==> 0XF8000728[0:0] = 0x00000000U
+-    // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
++    // .. TRI_ENABLE = 1
++    // .. ==> 0XF8000728[0:0] = 0x00000001U
++    // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+     // .. L0_SEL = 0
+     // .. ==> 0XF8000728[1:1] = 0x00000000U
+     // ..     ==> MASK : 0x00000002U    VAL : 0x00000000U
+@@ -2315,23 +2315,24 @@ unsigned long ps7_mio_init_data_3_0[] = {
+     // .. L2_SEL = 0
+     // .. ==> 0XF8000728[4:3] = 0x00000000U
+     // ..     ==> MASK : 0x00000018U    VAL : 0x00000000U
+-    // .. L3_SEL = 0
+-    // .. ==> 0XF8000728[7:5] = 0x00000000U
+-    // ..     ==> MASK : 0x000000E0U    VAL : 0x00000000U
++    // .. L3_SEL = 7
++    // .. ==> 0XF8000728[7:5] = 0x00000007U
++    // ..     ==> MASK : 0x000000E0U    VAL : 0x000000E0U
+     // .. Speed = 0
+     // .. ==> 0XF8000728[8:8] = 0x00000000U
+     // ..     ==> MASK : 0x00000100U    VAL : 0x00000000U
+     // .. IO_Type = 3
+     // .. ==> 0XF8000728[11:9] = 0x00000003U
+     // ..     ==> MASK : 0x00000E00U    VAL : 0x00000600U
+-    // .. PULLUP = 0
+-    // .. ==> 0XF8000728[12:12] = 0x00000000U
+-    // ..     ==> MASK : 0x00001000U    VAL : 0x00000000U
++    // .. PULLUP = 1
++    // .. ==> 0XF8000728[12:12] = 0x00000001U
++    // ..     ==> MASK : 0x00001000U    VAL : 0x00001000U
+     // .. DisableRcvr = 0
+     // .. ==> 0XF8000728[13:13] = 0x00000000U
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+-    EMIT_MASKWRITE(0XF8000728, 0x00003FFFU ,0x00000600U),
++    // MIO_PIN_10 0x16E1 # [TRI_ENABLE=1 PULLUP=1, IO_Type=011(LVCMOS33=3.3V), L3_SEL=111(UART 0 RxD, Input)
++    EMIT_MASKWRITE(0XF8000728, 0x00003FFFU ,0x000016E1U),
+     // .. TRI_ENABLE = 0
+     // .. ==> 0XF800072C[0:0] = 0x00000000U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
+@@ -2344,23 +2345,24 @@ unsigned long ps7_mio_init_data_3_0[] = {
+     // .. L2_SEL = 0
+     // .. ==> 0XF800072C[4:3] = 0x00000000U
+     // ..     ==> MASK : 0x00000018U    VAL : 0x00000000U
+-    // .. L3_SEL = 0
+-    // .. ==> 0XF800072C[7:5] = 0x00000000U
+-    // ..     ==> MASK : 0x000000E0U    VAL : 0x00000000U
++    // .. L3_SEL = 7
++    // .. ==> 0XF800072C[7:5] = 0x00000007U
++    // ..     ==> MASK : 0x000000E0U    VAL : 0x000000E0U
+     // .. Speed = 0
+     // .. ==> 0XF800072C[8:8] = 0x00000000U
+     // ..     ==> MASK : 0x00000100U    VAL : 0x00000000U
+     // .. IO_Type = 3
+     // .. ==> 0XF800072C[11:9] = 0x00000003U
+     // ..     ==> MASK : 0x00000E00U    VAL : 0x00000600U
+-    // .. PULLUP = 0
+-    // .. ==> 0XF800072C[12:12] = 0x00000000U
+-    // ..     ==> MASK : 0x00001000U    VAL : 0x00000000U
++    // .. PULLUP = 1
++    // .. ==> 0XF800072C[12:12] = 0x00000001U
++    // ..     ==> MASK : 0x00001000U    VAL : 0x00001000U
+     // .. DisableRcvr = 0
+     // .. ==> 0XF800072C[13:13] = 0x00000000U
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+-    EMIT_MASKWRITE(0XF800072C, 0x00003FFFU ,0x00000600U),
++    // ${MIO_PIN_11} 0x16E0 # [TRI_ENABLE=0 PULLUP=1, IO_Type=011(LVCMOS33=3.3V), L3_SEL=111(UART 0 TxD, Output)
++    EMIT_MASKWRITE(0XF800072C, 0x00003FFFU ,0x000016E0U),
+     // .. TRI_ENABLE = 0
+     // .. ==> 0XF8000730[0:0] = 0x00000000U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
+@@ -4448,9 +4450,9 @@ unsigned long ps7_clock_init_data_2_0[] = {
+     // ..     ==> MASK : 0x00003F00U    VAL : 0x00001400U
+     // ..
+     EMIT_MASKWRITE(0XF8000150, 0x00003F33U ,0x00001401U),
+-    // .. CLKACT0 = 0x0
+-    // .. ==> 0XF8000154[0:0] = 0x00000000U
+-    // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
++    // .. CLKACT0 = 0x1
++    // .. ==> 0XF8000154[0:0] = 0x00000001U
++    // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+     // .. CLKACT1 = 0x1
+     // .. ==> 0XF8000154[1:1] = 0x00000001U
+     // ..     ==> MASK : 0x00000002U    VAL : 0x00000002U
+@@ -4461,7 +4463,7 @@ unsigned long ps7_clock_init_data_2_0[] = {
+     // .. ==> 0XF8000154[13:8] = 0x00000014U
+     // ..     ==> MASK : 0x00003F00U    VAL : 0x00001400U
+     // ..
+-    EMIT_MASKWRITE(0XF8000154, 0x00003F33U ,0x00001402U),
++    EMIT_MASKWRITE(0XF8000154, 0x00003F33U ,0x00001403U),
+     // .. CLKACT = 0x1
+     // .. ==> 0XF8000168[0:0] = 0x00000001U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+@@ -4561,9 +4563,9 @@ unsigned long ps7_clock_init_data_2_0[] = {
+     // .. I2C1_CPU_1XCLKACT = 0x1
+     // .. ==> 0XF800012C[19:19] = 0x00000001U
+     // ..     ==> MASK : 0x00080000U    VAL : 0x00080000U
+-    // .. UART0_CPU_1XCLKACT = 0x0
+-    // .. ==> 0XF800012C[20:20] = 0x00000000U
+-    // ..     ==> MASK : 0x00100000U    VAL : 0x00000000U
++    // .. UART0_CPU_1XCLKACT = 0x1
++    // .. ==> 0XF800012C[20:20] = 0x00000001U
++    // ..     ==> MASK : 0x00100000U    VAL : 0x00100000U
+     // .. UART1_CPU_1XCLKACT = 0x1
+     // .. ==> 0XF800012C[21:21] = 0x00000001U
+     // ..     ==> MASK : 0x00200000U    VAL : 0x00200000U
+@@ -4577,7 +4579,7 @@ unsigned long ps7_clock_init_data_2_0[] = {
+     // .. ==> 0XF800012C[24:24] = 0x00000001U
+     // ..     ==> MASK : 0x01000000U    VAL : 0x01000000U
+     // ..
+-    EMIT_MASKWRITE(0XF800012C, 0x01FFCCCDU ,0x01EC044DU),
++    EMIT_MASKWRITE(0XF800012C, 0x01FFCCCDU ,0x01FC044DU),
+     // .. FINISH: CLOCK CONTROL SLCR REGISTERS
+     // .. START: THIS SHOULD BE BLANK
+     // .. FINISH: THIS SHOULD BE BLANK
+@@ -6601,9 +6603,9 @@ unsigned long ps7_mio_init_data_2_0[] = {
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+     EMIT_MASKWRITE(0XF8000724, 0x00003FFFU ,0x00000600U),
+-    // .. TRI_ENABLE = 0
+-    // .. ==> 0XF8000728[0:0] = 0x00000000U
+-    // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
++    // .. TRI_ENABLE = 1
++    // .. ==> 0XF8000728[0:0] = 0x00000001U
++    // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+     // .. L0_SEL = 0
+     // .. ==> 0XF8000728[1:1] = 0x00000000U
+     // ..     ==> MASK : 0x00000002U    VAL : 0x00000000U
+@@ -6613,23 +6615,24 @@ unsigned long ps7_mio_init_data_2_0[] = {
+     // .. L2_SEL = 0
+     // .. ==> 0XF8000728[4:3] = 0x00000000U
+     // ..     ==> MASK : 0x00000018U    VAL : 0x00000000U
+-    // .. L3_SEL = 0
+-    // .. ==> 0XF8000728[7:5] = 0x00000000U
+-    // ..     ==> MASK : 0x000000E0U    VAL : 0x00000000U
++    // .. L3_SEL = 7
++    // .. ==> 0XF8000728[7:5] = 0x00000007U
++    // ..     ==> MASK : 0x000000E0U    VAL : 0x000000E0U
+     // .. Speed = 0
+     // .. ==> 0XF8000728[8:8] = 0x00000000U
+     // ..     ==> MASK : 0x00000100U    VAL : 0x00000000U
+     // .. IO_Type = 3
+     // .. ==> 0XF8000728[11:9] = 0x00000003U
+     // ..     ==> MASK : 0x00000E00U    VAL : 0x00000600U
+-    // .. PULLUP = 0
+-    // .. ==> 0XF8000728[12:12] = 0x00000000U
+-    // ..     ==> MASK : 0x00001000U    VAL : 0x00000000U
++    // .. PULLUP = 1
++    // .. ==> 0XF8000728[12:12] = 0x00001000U
++    // ..     ==> MASK : 0x00001000U    VAL : 0x00001000U
+     // .. DisableRcvr = 0
+     // .. ==> 0XF8000728[13:13] = 0x00000000U
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+-    EMIT_MASKWRITE(0XF8000728, 0x00003FFFU ,0x00000600U),
++    // MIO_PIN_10 0x16E1 # [TRI_ENABLE=1 PULLUP=1, IO_Type=011(LVCMOS33=3.3V), L3_SEL=111(UART 0 RxD, Input)
++    EMIT_MASKWRITE(0XF8000728, 0x00003FFFU ,0x000016E1U),
+     // .. TRI_ENABLE = 0
+     // .. ==> 0XF800072C[0:0] = 0x00000000U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
+@@ -6642,23 +6645,24 @@ unsigned long ps7_mio_init_data_2_0[] = {
+     // .. L2_SEL = 0
+     // .. ==> 0XF800072C[4:3] = 0x00000000U
+     // ..     ==> MASK : 0x00000018U    VAL : 0x00000000U
+-    // .. L3_SEL = 0
+-    // .. ==> 0XF800072C[7:5] = 0x00000000U
+-    // ..     ==> MASK : 0x000000E0U    VAL : 0x00000000U
++    // .. L3_SEL = 7
++    // .. ==> 0XF800072C[7:5] = 0x00000007U
++    // ..     ==> MASK : 0x000000E0U    VAL : 0x000000E0U
+     // .. Speed = 0
+     // .. ==> 0XF800072C[8:8] = 0x00000000U
+     // ..     ==> MASK : 0x00000100U    VAL : 0x00000000U
+     // .. IO_Type = 3
+     // .. ==> 0XF800072C[11:9] = 0x00000003U
+     // ..     ==> MASK : 0x00000E00U    VAL : 0x00000600U
+-    // .. PULLUP = 0
+-    // .. ==> 0XF800072C[12:12] = 0x00000000U
+-    // ..     ==> MASK : 0x00001000U    VAL : 0x00000000U
++    // .. PULLUP = 1
++    // .. ==> 0XF800072C[12:12] = 0x00000001U
++    // ..     ==> MASK : 0x00001000U    VAL : 0x00001000U
+     // .. DisableRcvr = 0
+     // .. ==> 0XF800072C[13:13] = 0x00000000U
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+-    EMIT_MASKWRITE(0XF800072C, 0x00003FFFU ,0x00000600U),
++    // MIO_PIN_11 0x16E0 # [TRI_ENABLE=0 PULLUP=1, IO_Type=011(LVCMOS33=3.3V), L3_SEL=111(UART 0 TxD, Output)
++    EMIT_MASKWRITE(0XF800072C, 0x00003FFFU ,0x000016E0U),
+     // .. TRI_ENABLE = 0
+     // .. ==> 0XF8000730[0:0] = 0x00000000U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
+@@ -8746,9 +8750,9 @@ unsigned long ps7_clock_init_data_1_0[] = {
+     // ..     ==> MASK : 0x00003F00U    VAL : 0x00001400U
+     // ..
+     EMIT_MASKWRITE(0XF8000150, 0x00003F33U ,0x00001401U),
+-    // .. CLKACT0 = 0x0
+-    // .. ==> 0XF8000154[0:0] = 0x00000000U
+-    // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
++    // .. CLKACT0 = 0x1
++    // .. ==> 0XF8000154[0:0] = 0x00000001U
++    // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+     // .. CLKACT1 = 0x1
+     // .. ==> 0XF8000154[1:1] = 0x00000001U
+     // ..     ==> MASK : 0x00000002U    VAL : 0x00000002U
+@@ -8759,7 +8763,7 @@ unsigned long ps7_clock_init_data_1_0[] = {
+     // .. ==> 0XF8000154[13:8] = 0x00000014U
+     // ..     ==> MASK : 0x00003F00U    VAL : 0x00001400U
+     // ..
+-    EMIT_MASKWRITE(0XF8000154, 0x00003F33U ,0x00001402U),
++    EMIT_MASKWRITE(0XF8000154, 0x00003F33U ,0x00001403U),
+     // .. CLKACT = 0x1
+     // .. ==> 0XF8000168[0:0] = 0x00000001U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+@@ -8859,9 +8863,9 @@ unsigned long ps7_clock_init_data_1_0[] = {
+     // .. I2C1_CPU_1XCLKACT = 0x1
+     // .. ==> 0XF800012C[19:19] = 0x00000001U
+     // ..     ==> MASK : 0x00080000U    VAL : 0x00080000U
+-    // .. UART0_CPU_1XCLKACT = 0x0
+-    // .. ==> 0XF800012C[20:20] = 0x00000000U
+-    // ..     ==> MASK : 0x00100000U    VAL : 0x00000000U
++    // .. UART0_CPU_1XCLKACT = 0x1
++    // .. ==> 0XF800012C[20:20] = 0x00000001U
++    // ..     ==> MASK : 0x00100000U    VAL : 0x00100000U
+     // .. UART1_CPU_1XCLKACT = 0x1
+     // .. ==> 0XF800012C[21:21] = 0x00000001U
+     // ..     ==> MASK : 0x00200000U    VAL : 0x00200000U
+@@ -8875,7 +8879,7 @@ unsigned long ps7_clock_init_data_1_0[] = {
+     // .. ==> 0XF800012C[24:24] = 0x00000001U
+     // ..     ==> MASK : 0x01000000U    VAL : 0x01000000U
+     // ..
+-    EMIT_MASKWRITE(0XF800012C, 0x01FFCCCDU ,0x01EC044DU),
++    EMIT_MASKWRITE(0XF800012C, 0x01FFCCCDU ,0x01FC044DU),
+     // .. FINISH: CLOCK CONTROL SLCR REGISTERS
+     // .. START: THIS SHOULD BE BLANK
+     // .. FINISH: THIS SHOULD BE BLANK
+@@ -10832,9 +10836,9 @@ unsigned long ps7_mio_init_data_1_0[] = {
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+     EMIT_MASKWRITE(0XF8000724, 0x00003FFFU ,0x00000600U),
+-    // .. TRI_ENABLE = 0
+-    // .. ==> 0XF8000728[0:0] = 0x00000000U
+-    // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
++    // .. TRI_ENABLE = 1
++    // .. ==> 0XF8000728[0:0] = 0x00000001U
++    // ..     ==> MASK : 0x00000001U    VAL : 0x00000001U
+     // .. L0_SEL = 0
+     // .. ==> 0XF8000728[1:1] = 0x00000000U
+     // ..     ==> MASK : 0x00000002U    VAL : 0x00000000U
+@@ -10844,23 +10848,24 @@ unsigned long ps7_mio_init_data_1_0[] = {
+     // .. L2_SEL = 0
+     // .. ==> 0XF8000728[4:3] = 0x00000000U
+     // ..     ==> MASK : 0x00000018U    VAL : 0x00000000U
+-    // .. L3_SEL = 0
+-    // .. ==> 0XF8000728[7:5] = 0x00000000U
+-    // ..     ==> MASK : 0x000000E0U    VAL : 0x00000000U
++    // .. L3_SEL = 7
++    // .. ==> 0XF8000728[7:5] = 0x00000007U
++    // ..     ==> MASK : 0x000000E0U    VAL : 0x000000E0U
+     // .. Speed = 0
+     // .. ==> 0XF8000728[8:8] = 0x00000000U
+     // ..     ==> MASK : 0x00000100U    VAL : 0x00000000U
+     // .. IO_Type = 3
+     // .. ==> 0XF8000728[11:9] = 0x00000003U
+     // ..     ==> MASK : 0x00000E00U    VAL : 0x00000600U
+-    // .. PULLUP = 0
+-    // .. ==> 0XF8000728[12:12] = 0x00000000U
+-    // ..     ==> MASK : 0x00001000U    VAL : 0x00000000U
++    // .. PULLUP = 1
++    // .. ==> 0XF8000728[12:12] = 0x00001000U
++    // ..     ==> MASK : 0x00001000U    VAL : 0x00001000U
+     // .. DisableRcvr = 0
+     // .. ==> 0XF8000728[13:13] = 0x00000000U
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+-    EMIT_MASKWRITE(0XF8000728, 0x00003FFFU ,0x00000600U),
++    // MIO_PIN_10 0x16E1 # [TRI_ENABLE=1 PULLUP=1, IO_Type=011(LVCMOS33=3.3V), L3_SEL=111(UART 0 RxD, Input)
++    EMIT_MASKWRITE(0XF8000728, 0x00003FFFU ,0x000016E1U),
+     // .. TRI_ENABLE = 0
+     // .. ==> 0XF800072C[0:0] = 0x00000000U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
+@@ -10873,23 +10878,24 @@ unsigned long ps7_mio_init_data_1_0[] = {
+     // .. L2_SEL = 0
+     // .. ==> 0XF800072C[4:3] = 0x00000000U
+     // ..     ==> MASK : 0x00000018U    VAL : 0x00000000U
+-    // .. L3_SEL = 0
+-    // .. ==> 0XF800072C[7:5] = 0x00000000U
+-    // ..     ==> MASK : 0x000000E0U    VAL : 0x00000000U
++    // .. L3_SEL = 7
++    // .. ==> 0XF800072C[7:5] = 0x00000007U
++    // ..     ==> MASK : 0x000000E0U    VAL : 0x000000E0U
+     // .. Speed = 0
+     // .. ==> 0XF800072C[8:8] = 0x00000000U
+     // ..     ==> MASK : 0x00000100U    VAL : 0x00000000U
+     // .. IO_Type = 3
+     // .. ==> 0XF800072C[11:9] = 0x00000003U
+     // ..     ==> MASK : 0x00000E00U    VAL : 0x00000600U
+-    // .. PULLUP = 0
+-    // .. ==> 0XF800072C[12:12] = 0x00000000U
+-    // ..     ==> MASK : 0x00001000U    VAL : 0x00000000U
++    // .. PULLUP = 1
++    // .. ==> 0XF800072C[12:12] = 0x00000001U
++    // ..     ==> MASK : 0x00001000U    VAL : 0x00001000U
+     // .. DisableRcvr = 0
+     // .. ==> 0XF800072C[13:13] = 0x00000000U
+     // ..     ==> MASK : 0x00002000U    VAL : 0x00000000U
+     // ..
+-    EMIT_MASKWRITE(0XF800072C, 0x00003FFFU ,0x00000600U),
++    // MIO_PIN_11 0x16E0 # [TRI_ENABLE=0 PULLUP=1, IO_Type=011(LVCMOS33=3.3V), L3_SEL=111(UART 0 TxD, Output)
++    EMIT_MASKWRITE(0XF800072C, 0x00003FFFU ,0x000016E0U),
+     // .. TRI_ENABLE = 0
+     // .. ==> 0XF8000730[0:0] = 0x00000000U
+     // ..     ==> MASK : 0x00000001U    VAL : 0x00000000U
+-- 
+1.9.1
+

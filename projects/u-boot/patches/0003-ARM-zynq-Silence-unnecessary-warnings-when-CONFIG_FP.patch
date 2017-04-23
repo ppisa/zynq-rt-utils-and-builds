@@ -1,0 +1,29 @@
+From 3b1c0569c1be08340a04c8f7a5772a08038710e9 Mon Sep 17 00:00:00 2001
+From: Pavel Pisa <ppisa@pikron.com>
+Date: Sun, 12 Feb 2017 23:43:47 +0100
+Subject: [PATCH 3/3] ARM: zynq: Silence unnecessary warnings when CONFIG_FPGA
+ is enabled by menu.
+
+Signed-off-by: Pavel Pisa <ppisa@pikron.com>
+---
+ include/configs/zynq-common.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/configs/zynq-common.h b/include/configs/zynq-common.h
+index 204b1ba..ef2abde 100644
+--- a/include/configs/zynq-common.h
++++ b/include/configs/zynq-common.h
+@@ -349,8 +349,8 @@
+ 					GENERATED_GBL_DATA_SIZE)
+ 
+ /* Enable the PL to be downloaded */
+-#define CONFIG_FPGA
+-#define CONFIG_FPGA_XILINX
++#define CONFIG_FPGA			1
++#define CONFIG_FPGA_XILINX		1
+ #define CONFIG_FPGA_ZYNQPL
+ #define CONFIG_CMD_FPGA_LOADMK
+ #define CONFIG_CMD_FPGA_LOADP
+-- 
+1.9.1
+

@@ -1,0 +1,28 @@
+From 8323d7c740b9e53acd85b67a60c524e9c051d6e4 Mon Sep 17 00:00:00 2001
+From: Pavel Pisa <ppisa@pikron.com>
+Date: Sun, 12 Feb 2017 23:42:43 +0100
+Subject: [PATCH 2/3] ARM: zynq: MicroZed, select UAR0 to be used for console.
+
+The pins MIO pins 10 and 11 on the POD connector are used.
+
+Signed-off-by: Pavel Pisa <ppisa@pikron.com>
+---
+ arch/arm/dts/zynq-microzed.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/zynq-microzed.dts b/arch/arm/dts/zynq-microzed.dts
+index 785f7cd..232b6b7 100644
+--- a/arch/arm/dts/zynq-microzed.dts
++++ b/arch/arm/dts/zynq-microzed.dts
+@@ -26,7 +26,7 @@
+ 
+ 	chosen {
+ 		bootargs = "earlyprintk";
+-		stdout-path = "serial1:115200n8";
++		stdout-path = "serial0:115200n8";
+ 	};
+ 
+ 	usb_phy0: phy0 {
+-- 
+1.9.1
+
