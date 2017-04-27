@@ -1,0 +1,43 @@
+From 223519738ff29c878f2ab497f41ab09893fae288 Mon Sep 17 00:00:00 2001
+From: Pavel Pisa <pisa@cmp.felk.cvut.cz>
+Date: Sat, 11 Feb 2017 22:48:22 +0100
+Subject: [PATCH 2/2] ARM: zynq: MicroZed: Left FPGA clocks enabled after boot
+ to keep PL AXI peripherals working.
+
+If the FCLK0 or other clock used in FPGA peripherals is switched
+off then the first attempt to access peripheral leads to complete
+system/CPU freeze.
+
+Signed-off-by: Pavel Pisa <pisa@cmp.felk.cvut.cz>
+---
+ arch/arm/boot/dts/zynq-zed-uart0.dts | 1 +
+ arch/arm/boot/dts/zynq-zed.dts       | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/arch/arm/boot/dts/zynq-zed-uart0.dts b/arch/arm/boot/dts/zynq-zed-uart0.dts
+index 28bad4b..03a421d 100644
+--- a/arch/arm/boot/dts/zynq-zed-uart0.dts
++++ b/arch/arm/boot/dts/zynq-zed-uart0.dts
+@@ -50,6 +50,7 @@
+ 
+ &clkc {
+ 	ps-clk-frequency = <33333333>;
++	fclk-enable = <0xf>;
+ };
+ 
+ &gem0 {
+diff --git a/arch/arm/boot/dts/zynq-zed.dts b/arch/arm/boot/dts/zynq-zed.dts
+index 7250c1e..25b9ef6 100644
+--- a/arch/arm/boot/dts/zynq-zed.dts
++++ b/arch/arm/boot/dts/zynq-zed.dts
+@@ -41,6 +41,7 @@
+ 
+ &clkc {
+ 	ps-clk-frequency = <33333333>;
++	fclk-enable = <0xf>;
+ };
+ 
+ &gem0 {
+-- 
+1.9.1
+
