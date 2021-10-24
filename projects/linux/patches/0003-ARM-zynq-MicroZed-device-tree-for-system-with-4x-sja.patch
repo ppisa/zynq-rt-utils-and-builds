@@ -1,4 +1,4 @@
-From c3b9754a4819c6f2609040ff309513a452821f79 Mon Sep 17 00:00:00 2001
+From d19e6d98b097425ab4d4941ce5d7aa0a45cf16b3 Mon Sep 17 00:00:00 2001
 From: Pavel Pisa <pisa@cmp.felk.cvut.cz>
 Date: Mon, 31 Jul 2017 18:04:03 +0200
 Subject: [PATCH 3/3] ARM: zynq: MicroZed: device tree for system with 4x
@@ -6,34 +6,33 @@ Subject: [PATCH 3/3] ARM: zynq: MicroZed: device tree for system with 4x
 
 Signed-off-by: Pavel Pisa <pisa@cmp.felk.cvut.cz>
 ---
- arch/arm/boot/dts/Makefile                |   1 +
- arch/arm/boot/dts/zynq-zed-uart0-4sja.dts | 171 ++++++++++++++++++++++++++++++
- 2 files changed, 172 insertions(+)
- create mode 100644 arch/arm/boot/dts/zynq-zed-uart0-4sja.dts
+ arch/arm/boot/dts/Makefile                    |   1 +
+ .../arm/boot/dts/zynq-microzed-uart0-4sja.dts | 198 ++++++++++++++++++
+ 2 files changed, 199 insertions(+)
+ create mode 100644 arch/arm/boot/dts/zynq-microzed-uart0-4sja.dts
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 2e67c1d..111fd19 100644
+index 0b165c0f09d3..dca4a1880861 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -903,6 +903,7 @@ dtb-$(CONFIG_ARCH_ZYNQ) += \
+@@ -1294,6 +1294,7 @@ dtb-$(CONFIG_ARCH_ZYNQ) += \
+ 	zynq-cc108.dtb \
+ 	zynq-microzed.dtb \
+ 	zynq-microzed-uart0.dtb \
++	zynq-microzed-uart0-4sja.dtb \
+ 	zynq-parallella.dtb \
+ 	zynq-zc702.dtb \
  	zynq-zc706.dtb \
- 	zynq-zed.dtb \
- 	zynq-zed-uart0.dtb \
-+	zynq-zed-uart0-4sja.dtb \
- 	zynq-zybo.dtb
- dtb-$(CONFIG_MACH_ARMADA_370) += \
- 	armada-370-db.dtb \
-diff --git a/arch/arm/boot/dts/zynq-zed-uart0-4sja.dts b/arch/arm/boot/dts/zynq-zed-uart0-4sja.dts
+diff --git a/arch/arm/boot/dts/zynq-microzed-uart0-4sja.dts b/arch/arm/boot/dts/zynq-microzed-uart0-4sja.dts
 new file mode 100644
-index 0000000..c44c28a
+index 000000000000..fae9fff72d09
 --- /dev/null
-+++ b/arch/arm/boot/dts/zynq-zed-uart0-4sja.dts
-@@ -0,0 +1,171 @@
++++ b/arch/arm/boot/dts/zynq-microzed-uart0-4sja.dts
+@@ -0,0 +1,198 @@
 +/*
 + *  Copyright (C) 2011 - 2014 Xilinx
 + *  Copyright (C) 2012 National Instruments Corp.
-+ *  Copyright (C) 2016 Martin Jerabek
-+ *  Copyright (C) 2017 Pavel Pisa
++ *  Copyright (C) 2016 Jagan Teki <jteki@openedev.com>
 + *
 + * This software is licensed under the terms of the GNU General Public
 + * License version 2, as published by the Free Software Foundation, and
@@ -48,8 +47,8 @@ index 0000000..c44c28a
 +/include/ "zynq-7000.dtsi"
 +
 +/ {
-+	model = "Zynq Zed Development Board";
-+	compatible = "xlnx,zynq-zed", "xlnx,zynq-7000";
++	model = "Avnet MicroZed board";
++	compatible = "avnet,zynq-microzed", "xlnx,zynq-microzed", "xlnx,zynq-7000";
 +
 +	aliases {
 +		ethernet0 = &gem0;
@@ -58,13 +57,13 @@ index 0000000..c44c28a
 +		mmc0 = &sdhci0;
 +	};
 +
-+	memory {
++	memory@0 {
 +		device_type = "memory";
-+		reg = <0x0 0x20000000>;
++		reg = <0x0 0x40000000>;
 +	};
 +
 +	chosen {
-+		bootargs = "";
++		bootargs = "earlycon";
 +		stdout-path = "serial0:115200n8";
 +	};
 +
@@ -157,6 +156,34 @@ index 0000000..c44c28a
 +	status = "okay";
 +	dr_mode = "host";
 +	usb-phy = <&usb_phy0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usb0_default>;
++};
++
++&pinctrl0 {
++	pinctrl_usb0_default: usb0-default {
++		mux {
++			groups = "usb0_0_grp";
++			function = "usb0";
++		};
++
++		conf {
++			groups = "usb0_0_grp";
++			slew-rate = <0>;
++			io-standard = <1>;
++		};
++
++		conf-rx {
++			pins = "MIO29", "MIO31", "MIO36";
++			bias-high-impedance;
++		};
++
++		conf-tx {
++			pins = "MIO28", "MIO30", "MIO32", "MIO33", "MIO34",
++			       "MIO35", "MIO37", "MIO38", "MIO39";
++			bias-disable;
++		};
++	};
 +};
 +
 +&amba {
@@ -201,5 +228,5 @@ index 0000000..c44c28a
 +	};
 +};
 -- 
-2.1.4
+2.30.2
 
