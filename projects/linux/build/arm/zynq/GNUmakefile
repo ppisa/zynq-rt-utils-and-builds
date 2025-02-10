@@ -21,6 +21,7 @@ MAKEARGS += O=$(if $(patsubst /%,,$(makedir)),$(CURDIR)/)$(patsubst .,,$(patsubs
 MAKEARGS += ARCH=$(ARCH) $(if $(CROSS_COMPILE),CROSS_COMPILE=$(CROSS_COMPILE))
 MAKEARGS += QTDIR=$(QTDIR)
 MAKEARGS += W=1
+MAKEARGS += DTC_FLAGS="-@ -q"
 
 MAKEFLAGS += --no-print-directory
 
