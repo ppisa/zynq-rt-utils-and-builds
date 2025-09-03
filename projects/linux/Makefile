@@ -1,6 +1,6 @@
-KERNEL_GIT ?= git://github.com/ppisa/linux-kernel.git
-KERNEL_BRANCH ?= linux-5.10.y-rt-pi
-KERNEL_SRC_DIR ?= linux-5.10
+KERNEL_GIT ?= https://github.com/ppisa/linux-kernel.git
+KERNEL_BRANCH ?= linux-6.12.y-rt-pi
+KERNEL_SRC_DIR ?= linux-6.12
 KERNEL_BUILD_DIR ?= build/arm/zynq
 
 ifneq ($(wildcard /usr/src/linux-devel),)

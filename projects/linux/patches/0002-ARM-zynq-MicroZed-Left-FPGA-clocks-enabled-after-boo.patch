@@ -1,4 +1,4 @@
-From 94c959cfb672bec4790b59da68ac08ea55520168 Mon Sep 17 00:00:00 2001
+From 308ca0a078c280cee347653f4fa6bd5c327998ae Mon Sep 17 00:00:00 2001
 From: Pavel Pisa <pisa@cmp.felk.cvut.cz>
 Date: Sat, 11 Feb 2017 22:48:22 +0100
 Subject: [PATCH 2/3] ARM: zynq: MicroZed: Left FPGA clocks enabled after boot
@@ -10,14 +10,14 @@ system/CPU freeze.
 
 Signed-off-by: Pavel Pisa <pisa@cmp.felk.cvut.cz>
 ---
- arch/arm/boot/dts/zynq-microzed-uart0.dts | 1 +
- arch/arm/boot/dts/zynq-zed.dts            | 1 +
+ arch/arm/boot/dts/xilinx/zynq-microzed-uart0.dts | 1 +
+ arch/arm/boot/dts/xilinx/zynq-microzed.dts       | 1 +
  2 files changed, 2 insertions(+)
 
-diff --git a/arch/arm/boot/dts/zynq-microzed-uart0.dts b/arch/arm/boot/dts/zynq-microzed-uart0.dts
+diff --git a/arch/arm/boot/dts/xilinx/zynq-microzed-uart0.dts b/arch/arm/boot/dts/xilinx/zynq-microzed-uart0.dts
 index 0f10c91cd50b..94414c4e49d4 100644
---- a/arch/arm/boot/dts/zynq-microzed-uart0.dts
-+++ b/arch/arm/boot/dts/zynq-microzed-uart0.dts
+--- a/arch/arm/boot/dts/xilinx/zynq-microzed-uart0.dts
++++ b/arch/arm/boot/dts/xilinx/zynq-microzed-uart0.dts
 @@ -42,6 +42,7 @@ usb_phy0: phy0 {
  
  &clkc {
@@ -26,11 +26,11 @@ index 0f10c91cd50b..94414c4e49d4 100644
  };
  
  &gem0 {
-diff --git a/arch/arm/boot/dts/zynq-zed.dts b/arch/arm/boot/dts/zynq-zed.dts
-index 6a5a93aa6552..d21b967fb984 100644
---- a/arch/arm/boot/dts/zynq-zed.dts
-+++ b/arch/arm/boot/dts/zynq-zed.dts
-@@ -34,6 +34,7 @@ usb_phy0: phy0 {
+diff --git a/arch/arm/boot/dts/xilinx/zynq-microzed.dts b/arch/arm/boot/dts/xilinx/zynq-microzed.dts
+index 6ed84fb15902..090c36e4cb67 100644
+--- a/arch/arm/boot/dts/xilinx/zynq-microzed.dts
++++ b/arch/arm/boot/dts/xilinx/zynq-microzed.dts
+@@ -33,6 +33,7 @@ usb_phy0: phy0 {
  
  &clkc {
  	ps-clk-frequency = <33333333>;
@@ -39,5 +39,5 @@ index 6a5a93aa6552..d21b967fb984 100644
  
  &gem0 {
 -- 
-2.30.2
+2.39.5
 
